@@ -1,12 +1,13 @@
 package com.capacity.microservice.capacity_microservice.domain.useCase;
 
+import com.capacity.microservice.capacity_microservice.domain.exceptions.AlreadyHaveSameTechnologyAsociatedException;
 import com.capacity.microservice.capacity_microservice.domain.exceptions.DoesntHaveMinimunTechnologiesException;
+import com.capacity.microservice.capacity_microservice.domain.exceptions.TechnologiesNotFoud;
 import com.capacity.microservice.capacity_microservice.domain.exceptions.TechnologiesNumberExceededException;
 import com.capacity.microservice.capacity_microservice.domain.model.CapacityModel;
 import com.capacity.microservice.capacity_microservice.domain.ports.in.ICapacityServicePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ICapacityPersistencePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ITechnologyClientPort;
-import com.capacity.microservice.capacity_microservice.domain.utils.constans.TechnologyCapacityDTO;
 import com.capacity.microservice.capacity_microservice.domain.utils.constans.TechnologyIdsDTO;
 import lombok.AllArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -14,7 +15,8 @@ import reactor.core.publisher.Mono;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import static com.capacity.microservice.capacity_microservice.domain.utils.constans.DomainConstans.*;
 
 @AllArgsConstructor
 public class CapacityUseCase implements ICapacityServicePort {
@@ -28,7 +30,7 @@ public class CapacityUseCase implements ICapacityServicePort {
                 .then(technologyClientPort.existTechnologies(dto))
                 .flatMap(exist -> {
                     if (!exist) {
-                        return Mono.error(new IllegalArgumentException("Algunas tecnologías no existen."));
+                        return Mono.error(new TechnologiesNotFoud(TECHNOLOGIES_DOESNT_EXISTS));
                     }
 
                     List<Long> technologiesId = capacityModel.getTechnologiesIds().stream().map(Long::parseLong).toList();
@@ -44,18 +46,18 @@ public class CapacityUseCase implements ICapacityServicePort {
     }
 
     public Mono<Void> validationsCapacity(CapacityModel capacityModel) {
-        if (capacityModel.getTechnologiesIds().size() < 3) {
-            return Mono.error(new DoesntHaveMinimunTechnologiesException("La capacidad debe tener al menos 3 tecnologías."));
+        if (capacityModel.getTechnologiesIds().size() < MINIMUM_TECHNOLOGIES_ASOCIATE) {
+            return Mono.error(new DoesntHaveMinimunTechnologiesException(String.format(DOESNT_HAVE_MINIMUN_TECHNOLOGIES, MINIMUM_TECHNOLOGIES_ASOCIATE)));
         }
-        if (capacityModel.getTechnologiesIds().size() > 20) {
-            return Mono.error(new TechnologiesNumberExceededException("La capacidad no puede tener más de 20 tecnologías."));
+        if (capacityModel.getTechnologiesIds().size() > MAXIMUN_TECHNOLOGIES_ASOCIATE) {
+            return Mono.error(new TechnologiesNumberExceededException(String.format(TECHNOLOGIES_NUMBER_EXCEEDED, MAXIMUN_TECHNOLOGIES_ASOCIATE)));
         }
 
 
         Set<String> uniqueTechnologies = new HashSet<>(capacityModel.getTechnologiesIds());
 
         if (uniqueTechnologies.size() != capacityModel.getTechnologiesIds().size()) {
-            return Mono.error(new IllegalArgumentException("No se pueden repetir tecnologías en una capacidad."));
+            return Mono.error(new AlreadyHaveSameTechnologyAsociatedException(CANNOT_REPEAT_TECHNOLOGIES));
         }
 
         return Mono.empty();
