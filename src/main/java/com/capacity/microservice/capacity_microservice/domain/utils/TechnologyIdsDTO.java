@@ -1,4 +1,4 @@
-package com.capacity.microservice.capacity_microservice.domain.utils.constans;
+package com.capacity.microservice.capacity_microservice.domain.utils;
 
 import java.util.List;
 
