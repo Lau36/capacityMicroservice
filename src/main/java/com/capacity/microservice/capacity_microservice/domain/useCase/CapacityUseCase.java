@@ -55,10 +55,6 @@ public class CapacityUseCase implements ICapacityServicePort {
         return capacityPersistencePort.listAllCapacities(pagination)
                 .flatMap(capacitiesPaginated -> {
 
-                    if (capacitiesPaginated == null) {
-                        return Mono.error(new IllegalStateException("capacitiesPaginated es nulo"));
-                    }
-
                     long totalElements = capacitiesPaginated.getTotalElements();
                     int totalPages = capacitiesPaginated.getTotalPages();
 
