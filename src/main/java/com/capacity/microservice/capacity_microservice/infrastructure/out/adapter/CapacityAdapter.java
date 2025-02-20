@@ -20,7 +20,10 @@ public class CapacityAdapter implements ICapacityPersistencePort {
 
     @Override
     public Mono<CapacityModel> saveCapacity(CapacityModel capacityModel) {
-        CapacityEntity entity = new CapacityEntity(capacityModel.getId(), capacityModel.getName(), capacityModel.getDescription());
+        Integer technologiesCount = capacityModel.getTechnologiesIds().size();
+        CapacityEntity entity = new CapacityEntity(capacityModel.getId(), capacityModel.getName(), capacityModel.getDescription(), technologiesCount);
+
+
         return capacityRepository.save(entity)
                 .map(savedEntity ->
                         new CapacityModel(
@@ -28,7 +31,7 @@ public class CapacityAdapter implements ICapacityPersistencePort {
                                 savedEntity.getName(),
                                 savedEntity.getDescription(),
                                 capacityModel.getTechnologiesIds(),
-                                capacityModel.getTechnologiesIds().size()
+                                savedEntity.getTechnology_count()
                         )
                 );
     }

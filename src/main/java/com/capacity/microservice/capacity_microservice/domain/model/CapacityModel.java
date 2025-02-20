@@ -24,6 +24,25 @@ public class CapacityModel {
         return technologiesCount;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setTechnologiesIds(List<String> technologiesIds) {
+        this.technologiesIds = technologiesIds;
+    }
+
+    public void setTechnologiesCount(Integer technologiesCount) {
+        this.technologiesCount = technologiesCount;
+    }
 
     public CapacityModel(Long id, String name, String description, List<String> technologiesIds, Integer technologiesCount) {
         this.id = id;
