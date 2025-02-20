@@ -8,8 +8,12 @@ import com.capacity.microservice.capacity_microservice.domain.model.CapacityMode
 import com.capacity.microservice.capacity_microservice.domain.ports.in.ICapacityServicePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ICapacityPersistencePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ITechnologyClientPort;
-import com.capacity.microservice.capacity_microservice.domain.utils.constans.TechnologyIdsDTO;
+import com.capacity.microservice.capacity_microservice.domain.utils.Capacities;
+import com.capacity.microservice.capacity_microservice.domain.utils.CapacitiesAndTechnologiesPaginated;
+import com.capacity.microservice.capacity_microservice.domain.utils.Pagination;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdsDTO;
 import lombok.AllArgsConstructor;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
@@ -39,9 +43,38 @@ public class CapacityUseCase implements ICapacityServicePort {
                             .flatMap(savedCapacity ->
                                     technologyClientPort.associateTechnologies(technologiesId, savedCapacity.getId())
                                             .thenReturn(savedCapacity)
-                                            .onErrorResume(error -> capacityPersistencePort.deleteCapacity(savedCapacity.getId())
+                                            .onErrorResume(
+                                                    error -> capacityPersistencePort.deleteCapacity(savedCapacity.getId())
                                                     .then(Mono.error(error)))
                             ).then();
+                });
+    }
+
+    @Override
+    public Mono<CapacitiesAndTechnologiesPaginated> getAllCapacities(Pagination pagination) {
+        return capacityPersistencePort.listAllCapacities(pagination)
+                .flatMap(capacitiesPaginated -> {
+
+                    long totalElements = capacitiesPaginated.getTotalElements();
+                    int totalPages = capacitiesPaginated.getTotalPages();
+
+                    return Flux.fromIterable(capacitiesPaginated.getCapacities())
+                            .flatMap(capacityModel ->
+                                    technologyClientPort.technologiesAssociateToCapacityId(capacityModel.getId().intValue())
+                                            .collectList()
+                                            .map(technologies -> new Capacities(
+                                                    capacityModel.getId(),
+                                                    capacityModel.getName(),
+                                                    capacityModel.getDescription(),
+                                                    technologies))
+                            )
+                            .collectList()
+                            .map(capacitiesList -> new CapacitiesAndTechnologiesPaginated(
+                                    capacitiesList,
+                                    pagination.getPage(),
+                                    totalPages,
+                                    totalElements
+                            ));
                 });
     }
 

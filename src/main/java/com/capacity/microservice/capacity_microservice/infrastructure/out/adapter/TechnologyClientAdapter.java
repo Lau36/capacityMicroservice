@@ -2,17 +2,17 @@ package com.capacity.microservice.capacity_microservice.infrastructure.out.adapt
 
 import com.capacity.microservice.capacity_microservice.application.dto.request.TechnologyCapacityRequest;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ITechnologyClientPort;
-import com.capacity.microservice.capacity_microservice.domain.utils.constans.TechnologyIdsDTO;
+import com.capacity.microservice.capacity_microservice.domain.utils.Technologies;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdsDTO;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static com.capacity.microservice.capacity_microservice.infrastructure.utils.constants.InfraConstans.TECHNOLOGY_ASOCIATE_PATH;
-import static com.capacity.microservice.capacity_microservice.infrastructure.utils.constants.InfraConstans.TECHNOLOGY_EXISTS_PATH;
+import static com.capacity.microservice.capacity_microservice.infrastructure.utils.constants.InfraConstans.*;
 
 @Component
 @AllArgsConstructor
@@ -35,6 +35,18 @@ public class TechnologyClientAdapter implements ITechnologyClientPort {
                 .bodyValue(new TechnologyCapacityRequest(capacityId, technologyIds))
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    @Override
+    public Flux<Technologies> technologiesAssociateToCapacityId(Integer capacityId) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(GET_TECHNOLOGIES_PATH)
+                        .queryParam(CAPACITY_ID_PARAMETER, capacityId)
+                        .build()
+                )
+                .retrieve()
+                .bodyToFlux(Technologies.class);
     }
 
 }

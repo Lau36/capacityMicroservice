@@ -6,4 +6,6 @@ public class InfraConstans {
     public static final String TECHNOLOGY_MICROSERVICE = "http://localhost:9090";
     public static final String TECHNOLOGY_EXISTS_PATH = "http://localhost:9090/api/v1/technology/exists";
     public static final String TECHNOLOGY_ASOCIATE_PATH = "http://localhost:9090/api/v1/technology/asociate";
+    public static final String GET_TECHNOLOGIES_PATH = "/api/v1/technology/get";
+    public static final String CAPACITY_ID_PARAMETER = "capacityId";
 }
