@@ -9,6 +9,7 @@ import com.capacity.microservice.capacity_microservice.infrastructure.out.reposi
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -65,6 +66,18 @@ public class CapacityAdapter implements ICapacityPersistencePort {
                             totalPages
                     );
                 });
+    }
+
+    @Override
+    public Flux<CapacityModel> getCapacities(List<Long> capacitiesId) {
+        return capacityRepository.findAllByIdIn(capacitiesId).map(this::toModel);
+    }
+
+    @Override
+    public Mono<Boolean> existCapacitiesById(List<Long> capacitiesId) {
+        return capacityRepository.countByIdIn(capacitiesId).map(
+                count -> count == capacitiesId.size()
+        );
     }
 
     public CapacityModel toModel(CapacityEntity capacityEntity) {

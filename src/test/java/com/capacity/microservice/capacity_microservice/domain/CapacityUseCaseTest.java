@@ -24,9 +24,9 @@ import reactor.test.StepVerifier;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CapacityUseCaseTest {
@@ -70,6 +70,35 @@ public class CapacityUseCaseTest {
     }
 
     @Test
+    void createCapacity_FailsAndDeletesSavedCapacity() {
+        CapacityModel capacityModel = new CapacityModel(1L, "Test Capacity", "Desc", List.of("1", "2", "3"), 3);
+        List<Long> technologiesId = capacityModel.getTechnologiesIds().stream().map(Long::parseLong).toList();
+        CapacityModel savedCapacity = new CapacityModel(1L, "Test Capacity", "Desc", List.of("1", "2", "3"), 3);
+
+        Mockito.when(technologyClientPort.existTechnologies(ArgumentMatchers.any(TechnologyIdsDTO.class)))
+                .thenReturn(Mono.just(true));
+
+        Mockito.when(capacityPersistencePort.saveCapacity(capacityModel))
+                .thenReturn(Mono.just(savedCapacity));
+
+        Mockito.when(technologyClientPort.associateTechnologies(technologiesId, savedCapacity.getId()))
+                .thenReturn(Mono.error(new RuntimeException("Error al asociar tecnologías")));
+
+        Mockito.when(capacityPersistencePort.deleteCapacity(savedCapacity.getId()))
+                .thenReturn(Mono.empty());
+
+        Mono<Void> result = capacityUseCase.createCapacity(capacityModel);
+
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        verify(capacityPersistencePort, times(1)).saveCapacity(capacityModel);
+        verify(technologyClientPort, times(1)).associateTechnologies(technologiesId, savedCapacity.getId());
+        verify(capacityPersistencePort, times(1)).deleteCapacity(savedCapacity.getId());
+    }
+
+    @Test
     void createCapacity_FailsWhenTechnologiesDoNotExist() {
 
         Mockito.when(technologyClientPort.existTechnologies(ArgumentMatchers.any())).thenReturn(Mono.just(false));
@@ -100,6 +129,40 @@ public class CapacityUseCaseTest {
                         response ->
                                 response.getTotalElements() == 2L && response.getTotalPages() == 5)
                 .verifyComplete();
+    }
+
+    @Test
+    void getAllCapacitiesTest() {
+        CapacityModel capacityModel = new CapacityModel(1L, "Test Capacity", "Desc", List.of("1", "2", "3"), 3);
+        Technologies technology = new Technologies(1L, "Tech 1");
+        Capacities capacities = new Capacities(1L, "Test Capacity", "Desc", List.of(technology));
+
+        Mockito.when(capacityPersistencePort.getCapacities(ArgumentMatchers.any())).thenReturn(Flux.just(capacityModel));
+        Mockito.when(technologyClientPort.technologiesAssociateToCapacityId(ArgumentMatchers.any())).thenReturn(Flux.just(technology));
+        Flux<Capacities> result = capacityUseCase.getCapacities(ArgumentMatchers.any());
+
+        StepVerifier.create(result)
+                .assertNext(actualCapacities -> {
+                    assertEquals(capacities.getId(), actualCapacities.getId());
+                    assertEquals(capacities.getName(), actualCapacities.getName());
+                    assertEquals(capacities.getDescription(), actualCapacities.getDescription());
+                    assertEquals(capacities.getTechnologies(), actualCapacities.getTechnologies());
+                })
+                .verifyComplete();
+
+        verify(capacityPersistencePort, times(1)).getCapacities(ArgumentMatchers.any());
+
+    }
+
+    @Test
+    void existsCapacititesTest(){
+        List<Long> capacitiesId = List.of(1L, 2L, 3L);
+
+        Mockito.when(capacityPersistencePort.existCapacitiesById(capacitiesId)).thenReturn(Mono.just(true));
+
+        Mono<Boolean> result = capacityUseCase.existCapacitiesById(capacitiesId);
+
+        StepVerifier.create(result).expectNext(true).verifyComplete();
     }
 
     @Test

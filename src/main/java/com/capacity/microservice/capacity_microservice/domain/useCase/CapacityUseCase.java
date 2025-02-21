@@ -78,6 +78,29 @@ public class CapacityUseCase implements ICapacityServicePort {
                 });
     }
 
+    @Override
+    public Flux<Capacities> getCapacities(List<Long> capacitiesId) {
+        return capacityPersistencePort.getCapacities(capacitiesId).flatMap(
+                capacity ->
+                        technologyClientPort.technologiesAssociateToCapacityId(capacity.getId().intValue())
+                                .collectList()
+                                .map(
+                                technologies ->
+                                        new Capacities(
+                                        capacity.getId(),
+                                        capacity.getName(),
+                                        capacity.getDescription(),
+                                        technologies)
+                        )
+        );
+    }
+
+    @Override
+    public Mono<Boolean> existCapacitiesById(List<Long> capacitiesId) {
+        return capacityPersistencePort.existCapacitiesById(capacitiesId);
+    }
+
+
     public Mono<Void> validationsCapacity(CapacityModel capacityModel) {
         if (capacityModel.getTechnologiesIds().size() < MINIMUM_TECHNOLOGIES_ASOCIATE) {
             return Mono.error(new DoesntHaveMinimunTechnologiesException(String.format(DOESNT_HAVE_MINIMUN_TECHNOLOGIES, MINIMUM_TECHNOLOGIES_ASOCIATE)));
