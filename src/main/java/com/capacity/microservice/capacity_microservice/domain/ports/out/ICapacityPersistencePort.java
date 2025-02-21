@@ -1,7 +1,6 @@
 package com.capacity.microservice.capacity_microservice.domain.ports.out;
 
 import com.capacity.microservice.capacity_microservice.domain.model.CapacityModel;
-import com.capacity.microservice.capacity_microservice.domain.utils.Capacities;
 import com.capacity.microservice.capacity_microservice.domain.utils.CapacitiesPaginated;
 import com.capacity.microservice.capacity_microservice.domain.utils.Pagination;
 import reactor.core.publisher.Flux;

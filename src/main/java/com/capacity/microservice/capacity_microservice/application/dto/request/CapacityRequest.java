@@ -1,6 +1,5 @@
 package com.capacity.microservice.capacity_microservice.application.dto.request;
 
-import com.capacity.microservice.capacity_microservice.domain.model.TechnologyModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

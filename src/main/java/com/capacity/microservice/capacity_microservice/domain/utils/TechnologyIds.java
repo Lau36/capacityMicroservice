@@ -2,8 +2,8 @@ package com.capacity.microservice.capacity_microservice.domain.utils;
 
 import java.util.List;
 
-public class TechnologyIdsDTO {
-    public TechnologyIdsDTO(List<String> technologiesIds) {
+public class TechnologyIds {
+    public TechnologyIds(List<String> technologiesIds) {
         this.technologiesIds = technologiesIds;
     }
 

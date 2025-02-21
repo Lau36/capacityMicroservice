@@ -2,8 +2,8 @@ package com.capacity.microservice.capacity_microservice.infrastructure.out.adapt
 
 import com.capacity.microservice.capacity_microservice.application.dto.request.TechnologyCapacityRequest;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ITechnologyClientPort;
-import com.capacity.microservice.capacity_microservice.domain.utils.Technologies;
-import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdsDTO;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdName;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIds;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -20,7 +20,7 @@ public class TechnologyClientAdapter implements ITechnologyClientPort {
     private final WebClient webClient;
 
     @Override
-    public Mono<Boolean> existTechnologies(TechnologyIdsDTO technologyIds) {
+    public Mono<Boolean> existTechnologies(TechnologyIds technologyIds) {
         return webClient.post()
                 .uri(TECHNOLOGY_EXISTS_PATH)
                 .bodyValue(technologyIds)
@@ -38,7 +38,7 @@ public class TechnologyClientAdapter implements ITechnologyClientPort {
     }
 
     @Override
-    public Flux<Technologies> technologiesAssociateToCapacityId(Integer capacityId) {
+    public Flux<TechnologyIdName> technologiesAssociateToCapacityId(Integer capacityId) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path(GET_TECHNOLOGIES_PATH)
@@ -46,7 +46,7 @@ public class TechnologyClientAdapter implements ITechnologyClientPort {
                         .build()
                 )
                 .retrieve()
-                .bodyToFlux(Technologies.class);
+                .bodyToFlux(TechnologyIdName.class);
     }
 
 }

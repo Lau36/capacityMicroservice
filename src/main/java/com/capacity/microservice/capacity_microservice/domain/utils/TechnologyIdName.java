@@ -1,6 +1,6 @@
 package com.capacity.microservice.capacity_microservice.domain.utils;
 
-public class Technologies {
+public class TechnologyIdName {
     public Long getId() {
         return id;
     }
@@ -17,7 +17,7 @@ public class Technologies {
         this.name = name;
     }
 
-    public Technologies(Long id, String name) {
+    public TechnologyIdName(Long id, String name) {
         this.id = id;
         this.name = name;
     }

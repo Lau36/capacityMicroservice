@@ -1,6 +1,6 @@
 package com.capacity.microservice.capacity_microservice.application.dto.response;
 
-import com.capacity.microservice.capacity_microservice.domain.utils.Technologies;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdName;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,5 +13,5 @@ import java.util.List;
 public class CapacityResponse {
     private Long id;
     private String name;
-    private List<Technologies> technologiesList;
+    private List<TechnologyIdName> technologyIdNameList;
 }

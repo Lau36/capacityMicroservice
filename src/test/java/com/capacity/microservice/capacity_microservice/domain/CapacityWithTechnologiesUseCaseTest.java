@@ -29,7 +29,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class CapacityUseCaseTest {
+public class CapacityWithTechnologiesUseCaseTest {
 
     @Mock
     private ICapacityPersistencePort capacityPersistencePort;
@@ -75,7 +75,7 @@ public class CapacityUseCaseTest {
         List<Long> technologiesId = capacityModel.getTechnologiesIds().stream().map(Long::parseLong).toList();
         CapacityModel savedCapacity = new CapacityModel(1L, "Test Capacity", "Desc", List.of("1", "2", "3"), 3);
 
-        Mockito.when(technologyClientPort.existTechnologies(ArgumentMatchers.any(TechnologyIdsDTO.class)))
+        Mockito.when(technologyClientPort.existTechnologies(ArgumentMatchers.any(TechnologyIds.class)))
                 .thenReturn(Mono.just(true));
 
         Mockito.when(capacityPersistencePort.saveCapacity(capacityModel))
@@ -117,10 +117,10 @@ public class CapacityUseCaseTest {
         CapacitiesPaginated capacitiesPaginated = new CapacitiesPaginated(List.of(capacityModel)
                 , 1, 2L, 5);
 
-        Technologies technology = new Technologies(1L, "Tech 1");
+        TechnologyIdName technologyIdName = new TechnologyIdName(1L, "Tech 1");
 
         Mockito.when(capacityPersistencePort.listAllCapacities(pagination)).thenReturn(Mono.just(capacitiesPaginated));
-        Mockito.when(technologyClientPort.technologiesAssociateToCapacityId(anyInt())).thenReturn(Flux.just(technology));
+        Mockito.when(technologyClientPort.technologiesAssociateToCapacityId(anyInt())).thenReturn(Flux.just(technologyIdName));
 
         Mono<CapacitiesAndTechnologiesPaginated> result = capacityUseCase.getAllCapacities(pagination);
 
@@ -134,19 +134,19 @@ public class CapacityUseCaseTest {
     @Test
     void getAllCapacitiesTest() {
         CapacityModel capacityModel = new CapacityModel(1L, "Test Capacity", "Desc", List.of("1", "2", "3"), 3);
-        Technologies technology = new Technologies(1L, "Tech 1");
-        Capacities capacities = new Capacities(1L, "Test Capacity", "Desc", List.of(technology));
+        TechnologyIdName technologyIdName = new TechnologyIdName(1L, "Tech 1");
+        CapacityWithTechnologies capacityWithTechnologies = new CapacityWithTechnologies(1L, "Test Capacity", "Desc", List.of(technologyIdName));
 
         Mockito.when(capacityPersistencePort.getCapacities(ArgumentMatchers.any())).thenReturn(Flux.just(capacityModel));
-        Mockito.when(technologyClientPort.technologiesAssociateToCapacityId(ArgumentMatchers.any())).thenReturn(Flux.just(technology));
-        Flux<Capacities> result = capacityUseCase.getCapacities(ArgumentMatchers.any());
+        Mockito.when(technologyClientPort.technologiesAssociateToCapacityId(ArgumentMatchers.any())).thenReturn(Flux.just(technologyIdName));
+        Flux<CapacityWithTechnologies> result = capacityUseCase.getCapacities(ArgumentMatchers.any());
 
         StepVerifier.create(result)
                 .assertNext(actualCapacities -> {
-                    assertEquals(capacities.getId(), actualCapacities.getId());
-                    assertEquals(capacities.getName(), actualCapacities.getName());
-                    assertEquals(capacities.getDescription(), actualCapacities.getDescription());
-                    assertEquals(capacities.getTechnologies(), actualCapacities.getTechnologies());
+                    assertEquals(capacityWithTechnologies.getId(), actualCapacities.getId());
+                    assertEquals(capacityWithTechnologies.getName(), actualCapacities.getName());
+                    assertEquals(capacityWithTechnologies.getDescription(), actualCapacities.getDescription());
+                    assertEquals(capacityWithTechnologies.getTechnologies(), actualCapacities.getTechnologies());
                 })
                 .verifyComplete();
 

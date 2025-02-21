@@ -8,11 +8,10 @@ import com.capacity.microservice.capacity_microservice.domain.model.CapacityMode
 import com.capacity.microservice.capacity_microservice.domain.ports.in.ICapacityServicePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ICapacityPersistencePort;
 import com.capacity.microservice.capacity_microservice.domain.ports.out.ITechnologyClientPort;
-import com.capacity.microservice.capacity_microservice.domain.utils.Capacities;
+import com.capacity.microservice.capacity_microservice.domain.utils.CapacityWithTechnologies;
 import com.capacity.microservice.capacity_microservice.domain.utils.CapacitiesAndTechnologiesPaginated;
 import com.capacity.microservice.capacity_microservice.domain.utils.Pagination;
-import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIdsDTO;
-import lombok.AllArgsConstructor;
+import com.capacity.microservice.capacity_microservice.domain.utils.TechnologyIds;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,14 +21,18 @@ import java.util.Set;
 
 import static com.capacity.microservice.capacity_microservice.domain.utils.constans.DomainConstans.*;
 
-@AllArgsConstructor
 public class CapacityUseCase implements ICapacityServicePort {
     private final ICapacityPersistencePort capacityPersistencePort;
     private final ITechnologyClientPort technologyClientPort;
 
+    public CapacityUseCase(ICapacityPersistencePort capacityPersistencePort, ITechnologyClientPort technologyClientPort) {
+        this.capacityPersistencePort = capacityPersistencePort;
+        this.technologyClientPort = technologyClientPort;
+    }
+
     @Override
     public Mono<Void> createCapacity(CapacityModel capacityModel) {
-        TechnologyIdsDTO dto = new TechnologyIdsDTO((capacityModel.getTechnologiesIds()));
+        TechnologyIds dto = new TechnologyIds((capacityModel.getTechnologiesIds()));
         return validationsCapacity(capacityModel)
                 .then(technologyClientPort.existTechnologies(dto))
                 .flatMap(exist -> {
@@ -62,7 +65,7 @@ public class CapacityUseCase implements ICapacityServicePort {
                             .flatMap(capacityModel ->
                                     technologyClientPort.technologiesAssociateToCapacityId(capacityModel.getId().intValue())
                                             .collectList()
-                                            .map(technologies -> new Capacities(
+                                            .map(technologies -> new CapacityWithTechnologies(
                                                     capacityModel.getId(),
                                                     capacityModel.getName(),
                                                     capacityModel.getDescription(),
@@ -79,14 +82,14 @@ public class CapacityUseCase implements ICapacityServicePort {
     }
 
     @Override
-    public Flux<Capacities> getCapacities(List<Long> capacitiesId) {
+    public Flux<CapacityWithTechnologies> getCapacities(List<Long> capacitiesId) {
         return capacityPersistencePort.getCapacities(capacitiesId).flatMap(
                 capacity ->
                         technologyClientPort.technologiesAssociateToCapacityId(capacity.getId().intValue())
                                 .collectList()
                                 .map(
                                 technologies ->
-                                        new Capacities(
+                                        new CapacityWithTechnologies(
                                         capacity.getId(),
                                         capacity.getName(),
                                         capacity.getDescription(),

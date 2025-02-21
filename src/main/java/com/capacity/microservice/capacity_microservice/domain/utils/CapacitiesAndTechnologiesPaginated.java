@@ -3,14 +3,14 @@ package com.capacity.microservice.capacity_microservice.domain.utils;
 import java.util.List;
 
 public class CapacitiesAndTechnologiesPaginated {
-    public CapacitiesAndTechnologiesPaginated(List<Capacities> capacities, int currentPage, int totalPages, long totalElements) {
+    public CapacitiesAndTechnologiesPaginated(List<CapacityWithTechnologies> capacities, int currentPage, int totalPages, long totalElements) {
         this.capacities = capacities;
         this.currentPage = currentPage;
         this.totalPages = totalPages;
         this.totalElements = totalElements;
     }
 
-    public List<Capacities> getCapacities() {
+    public List<CapacityWithTechnologies> getCapacities() {
         return capacities;
     }
 
@@ -26,7 +26,7 @@ public class CapacitiesAndTechnologiesPaginated {
         return totalElements;
     }
 
-    public void setCapacities(List<Capacities> capacities) {
+    public void setCapacities(List<CapacityWithTechnologies> capacities) {
         this.capacities = capacities;
     }
 
@@ -42,7 +42,7 @@ public class CapacitiesAndTechnologiesPaginated {
         this.totalElements = totalElements;
     }
 
-    private List<Capacities> capacities;
+    private List<CapacityWithTechnologies> capacities;
     private int currentPage;
     private int totalPages;
     private long totalElements;
